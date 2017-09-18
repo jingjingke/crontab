@@ -1,28 +1,45 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <hello></hello>
+  	<div class="form-warp">
+  		<input readonly="readonly" v-model='crontabValue' />
+  		<button type="button" @click='showCrontab = !showCrontab'>选择时间规则</button>
+  	</div>
+    <Crontab v-if='showCrontab'></Crontab>
   </div>
 </template>
 
 <script>
-import Hello from './components/Hello'
+import Crontab from './components/Crontab'
 
 export default {
+	data(){
+		return {
+			crontabValue:'',
+			showCrontab:true
+		}
+	},
   name: 'app',
   components: {
-    Hello
+    Crontab
   }
 }
 </script>
-
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+	html,body,div,input,button,ul,li {
+		padding: 0;
+		margin: 0;
+	}
+	ul,li {
+		list-style: none;
+	}
+	html {
+		height: 100%;
+	}
+	body {
+		min-height: 100%;
+	}
+	.form-warp {
+		text-align: center;
+		padding-top: 200px;
+	}
 </style>
