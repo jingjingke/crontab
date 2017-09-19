@@ -6,13 +6,13 @@
     		<li v-for='(item,index) of tabTitles' :class='{on:index===tabActive}' @click='tabCheck(index)' >{{item}}</li>
     	</ul>
     	<ul class="popup-body">
-    		<CrontabSecond :class='{ on:tabActive===0 }'></CrontabSecond>
-    		<CrontabMin :class='{ on:tabActive===1 }'></CrontabMin>
-    		<CrontabHour :class='{ on:tabActive===2 }'></CrontabHour>
-    		<CrontabDay :class='{ on:tabActive===3 }'></CrontabDay>
-    		<CrontabMouth :class='{ on:tabActive===4 }'></CrontabMouth>
-    		<CrontabWeek :class='{ on:tabActive===5 }'></CrontabWeek>
-    		<CrontabYear :class='{ on:tabActive===6 }'></CrontabYear>
+    		<CrontabSecond :class='{ on:tabActive===0 }' @updata='updataContabValue' :check='checkNumber'></CrontabSecond>
+    		<CrontabMin :class='{ on:tabActive===1 }' @updata='updataContabValue' :check='checkNumber'></CrontabMin>
+    		<CrontabHour :class='{ on:tabActive===2 }' @updata='updataContabValue' :check='checkNumber'></CrontabHour>
+    		<CrontabDay :class='{ on:tabActive===3 }' @updata='updataContabValue' :check='checkNumber'></CrontabDay>
+    		<CrontabMouth :class='{ on:tabActive===4 }' @updata='updataContabValue' :check='checkNumber'></CrontabMouth>
+    		<CrontabWeek :class='{ on:tabActive===5 }' @updata='updataContabValue' :check='checkNumber'></CrontabWeek>
+    		<CrontabYear :class='{ on:tabActive===6 }' @updata='updataContabValue' :check='checkNumber'></CrontabYear>
     	</ul>
     	<div class="popup-result">
 				<p class="title">时间表达式</p>
@@ -22,21 +22,21 @@
 						<th>Cron完成表达式</th>
 					</thead>
 					<tbody>
-						<td><span>*</span></td>
-						<td><span>*</span></td>
-						<td><span>*</span></td>
-						<td><span>*</span></td>
-						<td><span>*</span></td>
-						<td><span>?</span></td>
-						<td><span></span></td>
-						<td><span>* * * * * ?</span></td>
+						<td><span>{{contabValueObj.second}}</span></td>
+						<td><span>{{contabValueObj.min}}</span></td>
+						<td><span>{{contabValueObj.hour}}</span></td>
+						<td><span>{{contabValueObj.day}}</span></td>
+						<td><span>{{contabValueObj.mouth}}</span></td>
+						<td><span>{{contabValueObj.week}}</span></td>
+						<td><span>{{contabValueObj.year}}</span></td>
+						<td><span>{{contabValueString}}</span></td>
 					</tbody>
 				</table>
 			</div>
-    	<CrontabResult></CrontabResult>
+    	<CrontabResult :ex='contabValueString'></CrontabResult>
     	<div class="popup-btns">
-    		<button type="button">确定</button>
-    		<button type="button">取消</button>
+    		<button type="button" @click='submitFill'>确定</button>
+    		<button type="button" @click='hidePopup'>取消</button>
     	</div>
     </div>
   </div>

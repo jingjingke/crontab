@@ -2,14 +2,14 @@
   <div id="app">
   	<div class="form-warp">
   		<input readonly="readonly" v-model='crontabValue' />
-  		<button type="button" @click='showCrontab = !showCrontab'>选择时间规则</button>
+  		<button type="button" @click='changeShow'>选择时间规则</button>
   	</div>
-    <Crontab v-if='showCrontab'></Crontab>
+    <Crontab v-show='showCrontab' @hide='changeShow' @fill='crontabFill'></Crontab>
   </div>
 </template>
 
 <script>
-import Crontab from './components/Crontab'
+import Crontab from './components/Crontab.vue'
 
 export default {
 	data(){
@@ -19,6 +19,16 @@ export default {
 		}
 	},
   name: 'app',
+  methods:{
+  	// 切换显示
+  	changeShow(){
+  		this.showCrontab = !this.showCrontab;
+  	},
+  	// 填充表达式
+  	crontabFill(value){
+  		this.crontabValue = value;
+  	}
+  },
   components: {
     Crontab
   }
