@@ -9,9 +9,9 @@
     		<CrontabSecond :class='{ on:tabActive===0 }' @updata='updataContabValue' :check='checkNumber'></CrontabSecond>
     		<CrontabMin :class='{ on:tabActive===1 }' @updata='updataContabValue' :check='checkNumber'></CrontabMin>
     		<CrontabHour :class='{ on:tabActive===2 }' @updata='updataContabValue' :check='checkNumber'></CrontabHour>
-    		<CrontabDay :class='{ on:tabActive===3 }' @updata='updataContabValue' :check='checkNumber'></CrontabDay>
+    		<CrontabDay :class='{ on:tabActive===3 }' @updata='updataContabValue' :check='checkNumber' :week='contabValueObj.week'></CrontabDay>
     		<CrontabMouth :class='{ on:tabActive===4 }' @updata='updataContabValue' :check='checkNumber'></CrontabMouth>
-    		<CrontabWeek :class='{ on:tabActive===5 }' @updata='updataContabValue' :check='checkNumber'></CrontabWeek>
+    		<CrontabWeek :class='{ on:tabActive===5 }' @updata='updataContabValue' :check='checkNumber' :day='contabValueObj.day'></CrontabWeek>
     		<CrontabYear :class='{ on:tabActive===6 }' @updata='updataContabValue' :check='checkNumber'></CrontabYear>
     	</ul>
     	<div class="popup-result">

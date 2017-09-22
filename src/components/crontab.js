@@ -19,7 +19,7 @@ export default {
 				hour:'*',
 				day:'*',
 				mouth:'*',
-				week:'*',
+				week:'?',
 				year:'',
 			}
 		}
@@ -30,10 +30,6 @@ export default {
 		tabCheck(index){
 			this.tabActive = index;
 		},
-		// 监听（计算字段）表达式值变化时触发
-//		contabValueChange(){
-//			console.log(this.contabValueString)
-//		},
 		// 由子组件触发，更改表达式组成的字段值
 		updataContabValue(name,value){
 			this.contabValueObj[name] = value;
@@ -59,9 +55,6 @@ export default {
 			this.hidePopup();
 		}
 	},
-//	watch: {
-//		'contabValueString':'contabValueChange'
-//	},
 	computed: {
 		contabValueString:function(){
 			let obj = this.contabValueObj;

@@ -1,7 +1,7 @@
 export default {
 	data() {
 		return {
-			radioValue:1,
+			radioValue:2,
 			weekday:1,
 			cycle01:1,
 			cycle02:2,
@@ -13,7 +13,7 @@ export default {
 		}
 	},
 	name: 'crontab-week',
-	props:['check'],
+	props:['check','day'],
 	methods: {
 		// 单选按钮值变化时
 		radioChange(){
@@ -38,6 +38,8 @@ export default {
 					break;
 			}
 		},
+		// 根据互斥事件，更改radio的值
+		
 		// 周期两个值变化时
 		cycleChange(){
 			if(this.radioValue==='3'){
@@ -61,6 +63,15 @@ export default {
 			if(this.radioValue==='6'){
 				this.$emit('updata','week',this.checkboxString);
 			}
+		},
+		// 父组件传递的day发生变化触发
+		dayChange(){
+			//判断week值与day不能同时为“?”
+			if(this.$options.propsData.day === '?' && this.radioValue == '2'){
+				this.radioValue = '1';
+			}else if(this.$options.propsData.day !== '?' && this.radioValue != '2'){
+				this.radioValue = '2';
+			}
 		}
 	},
 	watch: {
@@ -68,7 +79,8 @@ export default {
 		'cycleTotal':'cycleChange',
 		'averageTotal':'averageChange',
 		'weekdayCheck':'weekdayChange',
-		'checkboxString':'checkboxChange'
+		'checkboxString':'checkboxChange',
+		'day':'dayChange'
 	},
 	computed: {
 		// 计算两个周期值
