@@ -54,6 +54,7 @@ export default {
 				this.getWeekArr(ruleArr[5]);
 				this.getYearArr(ruleArr[6], nowYear);
 				let ssIdx = this.getIndex(this.dateArr[0], nowSecond);
+				let mmIdx = this.getIndex(this.dateArr[1], nowMin);
 				let nums = 0;
 				let resultArr = [];
 
@@ -62,19 +63,22 @@ export default {
 					if(nums === 5) break;
 					goMouth: for(let MM = nowMouth; MM <= 12; MM++) {
 						goDay: for(let DD = nowDay; DD <= 31; DD++) {
+							
 							goHour: for(let hh = nowHour; hh <= 23; hh++) {
-								goMin: for(let mm = nowMin; mm <= 59; mm++) {
+								let mmDate = this.dateArr[1];
+								goMin: for(let mi = mmIdx; mi < mmDate.length; mi++) {
+									let mm = mmDate[mi];
 									let ssDate = this.dateArr[0];
 									if(nowSecond > ssDate[ssDate.length - 1]) {
-										nowSecond = this.minss;
-										if(mm === this.maxmm) {
-											nowMin = this.minmm;
+										nowSecond = ssDate[0];
+										if(mi === mmDate.length - 1) {
+											mmIdx = 0;
 										}
-										continue goMin;
+										break goMin;
 									}
 									//循环获取秒数（从索引开始）
-									for(let i = ssIdx; i <= ssDate.length - 1; i++) {
-										let ss = ssDate[i];
+									goSecond: for(let si = ssIdx; si <= ssDate.length - 1; si++) {
+										let ss = ssDate[si];
 										let time = YY + '-' + (MM < 10 ? '0' + MM : MM) + '-' + (DD < 10 ? '0' + DD : DD) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm) + ':' + (ss < 10 ? '0' + ss : ss);
 										// 当这个时间合法时才会添加进去
 										if(this.checkDate(time)) {
@@ -87,15 +91,16 @@ export default {
 										//如果条数满了就退出循环
 										if(nums === 5) break goYear;
 										//如果到达最大值时
-										if(i === ssDate.length - 1) {
+										if(si === ssDate.length - 1 && mi !== mmDate.length - 1) {
 											ssIdx = 0;
-											if(mm === this.maxmm) {
-												nowMin = this.minmm;
-											}
 											continue goMin;
+										}else if( si === ssDate.length - 1 && mi === mmDate.length - 1 ){
+											ssIdx = 0;
+											mmIdx = 0;
+											continue goHour;
 										}
-									}
-								}
+									} //goSecond
+								} //goMin
 							}
 						}
 					}
@@ -106,11 +111,11 @@ export default {
 
 				// *********************判断获取下一个时间开始
 
-				//			if(ruleArr[6] !== undefined && ruleArr[6] !== '*'){
-				//				if(ruleArr[6].match(/[0-9]{1,4}/g)[0] !== timeArr[0]){
-				//					timeArr = [ruleArr[6].match(/[0-9]{1,4}/g)[0],'01','01','00','00','00']
-				//				}
-				//			}
+				//if(ruleArr[6] !== undefined && ruleArr[6] !== '*'){
+				//if(ruleArr[6].match(/[0-9]{1,4}/g)[0] !== timeArr[0]){
+				//timeArr = [ruleArr[6].match(/[0-9]{1,4}/g)[0],'01','01','00','00','00']
+				//}
+				//}
 				// *********************判断获取下一个时间结束
 			},
 
@@ -288,7 +293,7 @@ export default {
 			checkDate(value) {
 				let time = new Date(value);
 				let format = this.formatDate(time)
-					//			console.log(value,format)
+					//console.log(value,format)
 				return value === format ? true : false;
 			}
 		},
@@ -303,6 +308,6 @@ export default {
 			// 初始化 获取一次结果
 			this.expressionChange();
 
-			//		console.log(this.checkDate( '2017-9-40 04:5:6' ))
+			//console.log(this.checkDate( '2017-9-40 04:5:6' ))
 		}
 }
