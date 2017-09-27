@@ -1,252 +1,308 @@
 export default {
 	data() {
-		return {
-			YY:'',
-			MM:'',
-			DD:'',
-			hh:'',
-			mm:'',
-			ss:'',
-			week:'',
+			return {
+				maxYY: 0,
+				minYY: 0,
+				setpYY: 1,
+				maxMM: 12,
+				minMM: 1,
+				setpMM: 1,
+				maxDD: 31,
+				minDD: 1,
+				setpDD: 1,
+				maxhh: 23,
+				minhh: 0,
+				setphh: 1,
+				maxmm: 59,
+				minmm: 0,
+				setpmm: 1,
+				maxss: 59,
+				minss: 0,
+				setpss: 1,
+				dateArr: [],
+				resultList: [],
+				isShow: false
+			}
+		},
+		name: 'crontab-result',
+		methods: {
+			// 表达式值变化时，开始去计算结果
+			expressionChange() {
+				//获取规则数组[0秒、1分、2时、3日、4月、5星期、6年]
+				let ruleArr = this.$options.propsData.ex.split(' ');
+				// 获取当前时间并将值切割为[0年、1月、2日、3时、4分、5秒]
+				let nowTime = new Date('2017-09-26 17:59:58');
+				let nowYear = nowTime.getFullYear();
+				this.minYY = nowYear;
+				this.maxYY = nowYear + 100;
+				let nowMouth = nowTime.getMonth() + 1;
+				let nowDay = nowTime.getDate();
+				let nowHour = nowTime.getHours();
+				let nowMin = nowTime.getMinutes();
+				let nowSecond = nowTime.getSeconds();
+				let timeArr = this.formatDate(nowTime).match(/[0-9]{1,4}/g);
+				let timeNum = nowTime.getTime();
+				timeNum = timeNum - timeNum % 1000;
+				let timeWeek = this.formatDate(nowTime, 'week');
+
+				// 根据规则获取到可能的时间
+				this.getSecondArr(ruleArr[0]);
+				this.getMinArr(ruleArr[1]);
+				this.getHourArr(ruleArr[2]);
+				this.getDayArr(ruleArr[3]);
+				this.getMouthArr(ruleArr[4]);
+				this.getWeekArr(ruleArr[5]);
+				this.getYearArr(ruleArr[6], nowYear);
+				let ssIdx = this.getIndex(this.dateArr[0], nowSecond);
+				let nums = 0;
+				let resultArr = [];
+
+				// 利用for循环获取到时间值
+				goYear: for(let YY = nowYear; YY < nowYear + 100; YY++) {
+					if(nums === 5) break;
+					goMouth: for(let MM = nowMouth; MM <= 12; MM++) {
+						goDay: for(let DD = nowDay; DD <= 31; DD++) {
+							goHour: for(let hh = nowHour; hh <= 23; hh++) {
+								goMin: for(let mm = nowMin; mm <= 59; mm++) {
+									let ssDate = this.dateArr[0];
+									if(nowSecond > ssDate[ssDate.length - 1]) {
+										nowSecond = this.minss;
+										if(mm === this.maxmm) {
+											nowMin = this.minmm;
+										}
+										continue goMin;
+									}
+									//循环获取秒数（从索引开始）
+									for(let i = ssIdx; i <= ssDate.length - 1; i++) {
+										let ss = ssDate[i];
+										let time = YY + '-' + (MM < 10 ? '0' + MM : MM) + '-' + (DD < 10 ? '0' + DD : DD) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm) + ':' + (ss < 10 ? '0' + ss : ss);
+										// 当这个时间合法时才会添加进去
+										if(this.checkDate(time)) {
+											resultArr.push(time)
+											nums++;
+										} else {
+											ssIdx = 0;
+											continue goMin;
+										}
+										//如果条数满了就退出循环
+										if(nums === 5) break goYear;
+										//如果到达最大值时
+										if(i === ssDate.length - 1) {
+											ssIdx = 0;
+											if(mm === this.maxmm) {
+												nowMin = this.minmm;
+											}
+											continue goMin;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				this.resultList = resultArr;
+				this.isShow = true;
+				console.log(this.resultList)
+
+				// *********************判断获取下一个时间开始
+
+				//			if(ruleArr[6] !== undefined && ruleArr[6] !== '*'){
+				//				if(ruleArr[6].match(/[0-9]{1,4}/g)[0] !== timeArr[0]){
+				//					timeArr = [ruleArr[6].match(/[0-9]{1,4}/g)[0],'01','01','00','00','00']
+				//				}
+				//			}
+				// *********************判断获取下一个时间结束
+			},
+
+			getIndex(arr, value) {
+				if(value <= arr[0] || value > arr[arr.length - 1]) {
+					return 0;
+				} else {
+					for(let i = 0; i < arr.length - 1; i++) {
+						if(value > arr[i] && value <= arr[i + 1]) {
+							return i + 1;
+						}
+					}
+				}
+			},
+
+			getYearArr(rule, year) {
+				this.dateArr[6] = this.getOrderArr(year, year + 100);
+				if(rule !== undefined) {
+					if(rule.indexOf('-') >= 0) {
+						this.dateArr[6] = this.getCycleArr(rule, year + 100, false)
+					} else if(rule.indexOf('/') >= 0) {
+						this.dateArr[6] = this.getAverageArr(rule, year + 100)
+					} else if(rule !== '*') {
+						this.dateArr[6] = this.getAssignArr(rule)
+					}
+				}
+			},
+			getWeekArr(rule) {
+				this.dateArr[5] = this.getOrderArr(1, 7);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[5] = this.getCycleArr(rule, 7, false)
+				} else if(rule.indexOf('#') >= 0 || rule.indexOf('L') >= 0) {
+					this.dateArr[5] = rule;
+				} else if(rule !== '*' && rule !== '?') {
+					this.dateArr[5] = this.getAssignArr(rule)
+				}
+			},
+			getMouthArr(rule) {
+				this.dateArr[4] = this.getOrderArr(1, 12);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[4] = this.getCycleArr(rule, 12, false)
+				} else if(rule.indexOf('/') >= 0) {
+					this.dateArr[4] = this.getAverageArr(rule, 12)
+				} else if(rule !== '*') {
+					this.dateArr[4] = this.getAssignArr(rule)
+				}
+			},
+			getDayArr(rule) {
+				this.dateArr[3] = this.getOrderArr(1, 31);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[3] = this.getCycleArr(rule, 31, false)
+				} else if(rule.indexOf('/') >= 0) {
+					this.dateArr[3] = this.getAverageArr(rule, 31)
+				} else if(rule.indexOf('W') >= 0 || rule.indexOf('L') >= 0) {
+					this.dateArr[3] = rule;
+				} else if(rule !== '*' && rule !== '?') {
+					this.dateArr[3] = this.getAssignArr(rule)
+				}
+			},
+			getHourArr(rule) {
+				this.dateArr[2] = this.getOrderArr(0, 23);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[2] = this.getCycleArr(rule, 24, true)
+				} else if(rule.indexOf('/') >= 0) {
+					this.dateArr[2] = this.getAverageArr(rule, 23)
+				} else if(rule !== '*') {
+					this.dateArr[2] = this.getAssignArr(rule)
+				}
+			},
+			getMinArr(rule) {
+				this.dateArr[1] = this.getOrderArr(0, 59);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[1] = this.getCycleArr(rule, 60, true)
+				} else if(rule.indexOf('/') >= 0) {
+					this.dateArr[1] = this.getAverageArr(rule, 59)
+				} else if(rule !== '*') {
+					this.dateArr[1] = this.getAssignArr(rule)
+				}
+			},
+			getSecondArr(rule) {
+				this.dateArr[0] = this.getOrderArr(0, 59);
+				if(rule.indexOf('-') >= 0) {
+					this.dateArr[0] = this.getCycleArr(rule, 60, true)
+				} else if(rule.indexOf('/') >= 0) {
+					this.dateArr[0] = this.getAverageArr(rule, 59)
+				} else if(rule !== '*') {
+					this.dateArr[0] = this.getAssignArr(rule)
+				}
+			},
+
+			getOrderArr(min, max) {
+				let arr = [];
+				for(let i = min; i <= max; i++) {
+					arr.push(i);
+				}
+				return arr;
+			},
+
+			getAssignArr(rule) {
+				let arr = [];
+				let assiginArr = rule.split(',');
+				for(let i = 0; i < assiginArr.length; i++) {
+					arr[i] = Number(assiginArr[i])
+				}
+				arr.sort(this.compare)
+				return arr;
+			},
+			getAverageArr(rule, limit) {
+				let arr = [];
+				let agArr = rule.split('/');
+				let min = Number(agArr[0]);
+				let step = Number(agArr[1]);
+				while(min <= limit) {
+					arr.push(min);
+					min += step;
+				}
+				return arr;
+			},
+			getCycleArr(rule, limit, status) {
+				//status--表示是否从0开始（则从1开始）
+				let arr = [];
+				let cycleArr = rule.split('-');
+				let min = Number(cycleArr[0]);
+				let max = Number(cycleArr[1]);
+				if(min > max) {
+					max += limit;
+				}
+				for(let i = min; i <= max; i++) {
+					let add = 0;
+					if(status === false && i % limit === 0) {
+						add = limit;
+					}
+					arr.push(Math.round(i % limit + add))
+				}
+				arr.sort(this.compare)
+				return arr;
+			},
+			//比较数字大小
+			compare(value1, value2) {
+				if(value2 - value1 > 0) {
+					return -1;
+				} else {
+					return 1;
+				}
+			},
+			// 格式化日期格式如：2017-9-19 18:04:33
+			formatDate(value, type) {
+				let time = typeof value === 'number' ? new Date(value) : value;
+				let YY = time.getFullYear();
+				let MM = time.getMonth() + 1;
+				let DD = time.getDate();
+				let h = time.getHours();
+				let m = time.getMinutes();
+				let s = time.getSeconds();
+				let week = time.getDay();
+				if(type === undefined) {
+					return YY + '-' + (MM < 10 ? '0' + MM : MM) + '-' + (DD < 10 ? '0' + DD : DD) + ' ' + (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+				} else if(type === 'YY') {
+					return YY;
+				} else if(type === 'MM') {
+					return MM;
+				} else if(type === 'DD') {
+					return DD;
+				} else if(type === 'h') {
+					return h;
+				} else if(type === 'm') {
+					return m;
+				} else if(type === 's') {
+					return s;
+				} else if(type === 'week') {
+					return week;
+				}
+			},
+			// 检查日期是否存在
+			checkDate(value) {
+				let time = new Date(value);
+				let format = this.formatDate(time)
+					//			console.log(value,format)
+				return value === format ? true : false;
+			}
+		},
+		watch: {
+			'ex': 'expressionChange'
+		},
+		computed: {
+
+		},
+		props: ['ex'],
+		mounted: function() {
+			// 初始化 获取一次结果
+			this.expressionChange();
+
+			//		console.log(this.checkDate( '2017-9-40 04:5:6' ))
 		}
-	},
-	name: 'crontab-result',
-	methods: {
-		// 表达式值变化时，开始去计算结果
-		expressionChange(){
-			let timeArr = this.$options.propsData.ex.split(' ');
-			let dataArr = [[],[],[],[],[],[],[]];
-			//获取当前时间具体值
-			this.getDateInfo();
-			//根据日期开始向dataArr数组传递5个值
-			//-----------判断年
-			if(timeArr[6] === undefined || timeArr[6] === '*'){
-				// 如果不指定年或者每年的话
-				dataArr[0]=[this.YY,this.YY+1,this.YY+2,this.YY+3,this.YY+4];
-			}else if(timeArr[6].indexOf('-') > -1){
-				//如果指定一个周期
-				let cycleArr = timeArr[6].split('-');
-				let temp = cycleArr[0];
-				//如果周期第一个数大于第二个数则需要置换位置
-				if(cycleArr[0] > cycleArr[1]){
-					cycleArr[0] = cycleArr[1];
-					cycleArr[1] = temp;
-				}
-				//循环将数添加进去
-				for(let i=cycleArr[0];i<=cycleArr[1];i++){
-					dataArr[0].push(Number(i))
-				}
-			}else if(timeArr[6].indexOf('/') > -1){
-				//如果指定一个平均值
-				let averageArr = timeArr[6].split('/')
-				//循环将数添加进去
-				for(let i=0;i<5;i++){
-					dataArr[0].push(Number(averageArr[0]) + i*Number(averageArr[1]));
-				}
-			}else{
-				//其它-指定年份的情况
-				let yearArr = timeArr[6].split(',');
-				for(let i=0;i<yearArr.length;i++){
-					dataArr[0].push(Number(yearArr[i]))
-				}
-			}
-			//-----------判断月
-			if(timeArr[4] === '*'){
-				//不指定具体月
-				for(let i=0; i<5; i++){
-					let mouth = this.MM+i;
-					dataArr[1].push(mouth)
-				}
-			}else if(timeArr[4].indexOf('-') > -1){
-				//指定一个周期
-				let cycleArr = timeArr[4].split('-');
-				let temp = cycleArr[0];
-				//如果周期第一个数大于第二个数则需要置换位置
-				if(cycleArr[0] > cycleArr[1]){
-					cycleArr[0] = cycleArr[1];
-					cycleArr[1] = temp;
-				}
-				//循环将数添加进去
-				for(let i=cycleArr[0];i<=cycleArr[1];i++){
-					dataArr[1].push(Number(i))
-				}
-			}else if(timeArr[4].indexOf('/') > -1){
-				//如果指定一个平均值
-				let averageArr = timeArr[4].split('/')
-				//循环将数添加进去
-				for(let i=0;i<5;i++){
-					dataArr[1].push(Number(averageArr[0]) + i*Number(averageArr[1]));
-				}
-			}else{
-				//其它-指定月份的情况
-				let mouthArr = timeArr[4].split(',');
-				for(let i=0;i<mouthArr.length;i++){
-					dataArr[1].push(Number(mouthArr[i]))
-				}
-				dataArr[1].sort(this.compare);
-			}
-			//-----------判断小时
-			if(timeArr[2] === '*'){
-				//不指定具体小时
-				for(let i=0; i<5; i++){
-					let hour = this.hh+i;
-					dataArr[3].push(hour)
-				}
-			}else if(timeArr[2].indexOf('-') > -1){
-				//指定一个周期
-				let cycleArr = timeArr[2].split('-');
-				let temp = cycleArr[0];
-				//如果周期第一个数大于第二个数则需要置换位置
-				if(cycleArr[0] > cycleArr[1]){
-					cycleArr[0] = cycleArr[1];
-					cycleArr[1] = temp;
-				}
-				//循环将数添加进去
-				for(let i=cycleArr[0];i<=cycleArr[1];i++){
-					dataArr[3].push(Number(i))
-				}
-			}else if(timeArr[2].indexOf('/') > -1){
-				//如果指定一个平均值
-				let averageArr = timeArr[2].split('/')
-				//循环将数添加进去
-				for(let i=0;i<5;i++){
-					dataArr[3].push(Number(averageArr[0]) + i*Number(averageArr[1]));
-				}
-			}else{
-				//其它-指定小时的情况
-				let hourArr = timeArr[2].split(',');
-				for(let i=0;i<hourArr.length;i++){
-					dataArr[3].push(Number(hourArr[i]))
-				}
-				dataArr[3].sort(this.compare);
-			}
-			//-----------判断分钟
-			if(timeArr[1] === '*'){
-				//不指定具体分钟
-				for(let i=0; i<5; i++){
-					let min = this.hh+i;
-					dataArr[4].push(min)
-				}
-			}else if(timeArr[1].indexOf('-') > -1){
-				//指定一个周期
-				let cycleArr = timeArr[1].split('-');
-				let temp = cycleArr[0];
-				//如果周期第一个数大于第二个数则需要置换位置
-				if(cycleArr[0] > cycleArr[1]){
-					cycleArr[0] = cycleArr[1];
-					cycleArr[1] = temp;
-				}
-				//循环将数添加进去
-				for(let i=cycleArr[0];i<=cycleArr[1];i++){
-					dataArr[4].push(Number(i))
-				}
-			}else if(timeArr[1].indexOf('/') > -1){
-				//如果指定一个平均值
-				let averageArr = timeArr[1].split('/')
-				//循环将数添加进去
-				for(let i=0;i<5;i++){
-					dataArr[4].push(Number(averageArr[0]) + i*Number(averageArr[1]));
-				}
-			}else{
-				//其它-指定分钟的情况
-				let minArr = timeArr[1].split(',');
-				for(let i=0;i<minArr.length;i++){
-					dataArr[4].push(Number(minArr[i]))
-				}
-				dataArr[4].sort(this.compare);
-			}
-			//-----------判断秒数
-			if(timeArr[0] === '*'){
-				//不指定具体分钟
-				for(let i=0; i<5; i++){
-					let second = this.hh+i;
-					dataArr[5].push(second)
-				}
-			}else if(timeArr[0].indexOf('-') > -1){
-				//指定一个周期
-				let cycleArr = timeArr[0].split('-');
-				let temp = cycleArr[0];
-				//如果周期第一个数大于第二个数则需要置换位置
-				if(cycleArr[0] > cycleArr[1]){
-					cycleArr[0] = cycleArr[1];
-					cycleArr[1] = temp;
-				}
-				//循环将数添加进去
-				for(let i=cycleArr[0];i<=cycleArr[1];i++){
-					dataArr[5].push(Number(i))
-				}
-			}else if(timeArr[0].indexOf('/') > -1){
-				//如果指定一个平均值
-				let averageArr = timeArr[0].split('/')
-				//循环将数添加进去
-				for(let i=0;i<5;i++){
-					dataArr[5].push(Number(averageArr[0]) + i*Number(averageArr[1]));
-				}
-			}else{
-				//其它-指定分钟的情况
-				let minArr = timeArr[0].split(',');
-				for(let i=0;i<minArr.length;i++){
-					dataArr[5].push(Number(minArr[i]))
-				}
-				dataArr[5].sort(this.compare);
-			}
-			//判断日与星期的值（根据两种必须互斥的情况，一起来判断）
-			
-			
-			
-			
-			
-		},
-		//比较数字大小
-		compare(value1,value2){
-			if(value2-value1>0){
-				return -1;
-			}else{
-				return 1;
-			}
-		},
-		// 获取当前时间具体的年月日等值
-		getDateInfo(){
-			let now = new Date();
-			this.YY = now.getFullYear();
-			this.MM = now.getMonth()+1;
-			this.DD = now.getDate();
-			this.hh = now.getHours();
-			this.mm = now.getMinutes();
-			this.ss = now.getSeconds();
-			this.week = now.getDay();
-			if(this.week === 0) this.week = 7;
-		},
-		// 格式化日期格式如：2017-9-19 18:04:33
-		
-		formatDate(value){
-			let time = typeof value === 'number'?new Date(value):value;
-			let MM = time.getMonth()+1;
-			let DD = time.getDate();
-			let h = time.getHours();
-			let m = time.getMinutes();
-			let s = time.getSeconds();
-			return time.getFullYear() + '-' + (MM<10?'0'+MM:MM) + '-' + (DD<10?'0'+DD:DD) + ' ' + (h<10?'0'+h:h) + ':' + (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s);
-		},
-		// 检查日期是否存在
-		checkDate(value){
-			let time = new Date(value);
-			let format = this.formatDate(time)
-			console.log(value,format)
-			return value===format?true:false;
-		}
-	},
-	watch: {
-		'ex':'expressionChange'
-	},
-	computed: {
-		
-	},
-	props:['ex'],
-	mounted: function() {
-		// 初始化 获取一次结果
-		this.expressionChange();
-		
-//		console.log(this.checkDate( '2017-9-40 04:5:6' ))
-	}
 }
