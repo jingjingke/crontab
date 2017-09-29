@@ -1,24 +1,8 @@
 export default {
 	data() {
 			return {
-				maxYY: 0,
-				minYY: 0,
-				setpYY: 1,
-				maxMM: 12,
-				minMM: 1,
-				setpMM: 1,
-				maxDD: 31,
-				minDD: 1,
-				setpDD: 1,
-				maxhh: 23,
-				minhh: 0,
-				setphh: 1,
-				maxmm: 59,
-				minmm: 0,
-				setpmm: 1,
-				maxss: 59,
-				minss: 0,
-				setpss: 1,
+				dayRule:'',
+				dayRuleSup:'',
 				dateArr: [],
 				resultList: [],
 				isShow: false
@@ -30,21 +14,27 @@ export default {
 			expressionChange() {
 				//获取规则数组[0秒、1分、2时、3日、4月、5星期、6年]
 				let ruleArr = this.$options.propsData.ex.split(' ');
+
+//				console.log('dayRule:'+this.dayRule,'dayRuleSup:'+this.dayRuleSup)
+				
+				let nums = 0;
+				let resultArr = [];
+
 				// 获取当前时间并将值切割为[0年、1月、2日、3时、4分、5秒]
-				let nowTime = new Date('2017-09-26 17:59:58');
+				let nowTime = new Date('2017-09-30 23:59:58');
+
+				let timeNum = nowTime.getTime();
+				timeNum = timeNum - timeNum % 1000;
+				let timeWeek = this.formatDate(nowTime, 'week');
+
 				let nowYear = nowTime.getFullYear();
-				this.minYY = nowYear;
-				this.maxYY = nowYear + 100;
 				let nowMouth = nowTime.getMonth() + 1;
 				let nowDay = nowTime.getDate();
 				let nowHour = nowTime.getHours();
 				let nowMin = nowTime.getMinutes();
 				let nowSecond = nowTime.getSeconds();
 				let timeArr = this.formatDate(nowTime).match(/[0-9]{1,4}/g);
-				let timeNum = nowTime.getTime();
-				timeNum = timeNum - timeNum % 1000;
-				let timeWeek = this.formatDate(nowTime, 'week');
-
+				
 				// 根据规则获取到可能的时间
 				this.getSecondArr(ruleArr[0]);
 				this.getMinArr(ruleArr[1]);
@@ -53,70 +43,213 @@ export default {
 				this.getMouthArr(ruleArr[4]);
 				this.getWeekArr(ruleArr[5]);
 				this.getYearArr(ruleArr[6], nowYear);
+
 				let ssIdx = this.getIndex(this.dateArr[0], nowSecond);
 				let mmIdx = this.getIndex(this.dateArr[1], nowMin);
-				let nums = 0;
-				let resultArr = [];
+				let hhIdx = this.getIndex(this.dateArr[2], nowHour);
+				let DDIdx = this.getIndex(this.dateArr[3], nowDay);
+				let MMIdx = this.getIndex(this.dateArr[4], nowMouth);
+				let YYIdx = this.getIndex(this.dateArr[5], nowYear);
+
+				let ssDate = this.dateArr[0];
+				let mmDate = this.dateArr[1];
+				let hhDate = this.dateArr[2];
+				let DDDate = this.dateArr[3];
+				let MMDate = this.dateArr[4];
+				let YYDate = this.dateArr[5];
+				
+				
+				function resetMouth() {
+					MMIdx = 0;
+					nowMouth = MMDate[MMIdx]
+				}
+				function resetDay() {
+					DDIdx = 0;
+					nowDay = DDDate[DDIdx]
+				}
+				function resetHour() {
+					hhIdx = 0;
+					nowHour = hhDate[hhIdx]
+				}
+				function resetMin() {
+					mmIdx = 0;
+					nowMin = mmDate[mmIdx]
+				}
+				function resetSecond() {
+					ssIdx = 0;
+					nowSecond = ssDate[ssIdx]
+				}
 
 				// 利用for循环获取到时间值
-				goYear: for(let YY = nowYear; YY < nowYear + 100; YY++) {
-					if(nums === 5) break;
-					goMouth: for(let MM = nowMouth; MM <= 12; MM++) {
-						goDay: for(let DD = nowDay; DD <= 31; DD++) {
+				if(nowYear < YYDate[0]){
+					resetSecond();
+					resetMin();
+					resetHour();
+					resetDay();
+					resetMouth();
+				}
+				goYear: for(let Yi = YYIdx; Yi < YYDate.length; Yi++) {
+					let YY = YYDate[Yi];
+					//如果当前月份小于最小的月份则将几个数置0
+					if(nowMouth < MMDate[0]){
+						resetSecond();
+						resetMin();
+						resetHour();
+						resetDay();
+						resetMouth();
+					}
+					
+					goMouth: for(let Mi = MMIdx; Mi < MMDate.length; Mi++) {
+						//判断当前“月”是否超出范围，超出时将月日时分秒重置并跳出当月循环
+						if(nowMouth > MMDate[MMDate.length-1]){
+							resetSecond();
+							resetMin();
+							resetHour();
+							resetDay();
+							resetMouth();
+							continue goYear;
+						}
+						let MM = MMDate[Mi];
+						MM = MM < 10 ? '0' + MM : MM;
+						
+						goDay: for(let Di = DDIdx; Di < DDDate.length; Di++) {
+							//判断当前“日”是否超出范围，超出时将日时分秒重置并跳出当月循环
+							if(nowDay > DDDate[DDDate.length -1]){
+								resetSecond();
+								resetMin();
+								resetHour();
+								resetDay();
+								continue goMouth;
+							}
+							let DD = DDDate[Di];
+							DD = DD < 10 ? '0' + DD : DD;
 							
-							goHour: for(let hh = nowHour; hh <= 23; hh++) {
-								let mmDate = this.dateArr[1];
-								goMin: for(let mi = mmIdx; mi < mmDate.length; mi++) {
-									let mm = mmDate[mi];
-									let ssDate = this.dateArr[0];
-									if(nowSecond > ssDate[ssDate.length - 1]) {
-										nowSecond = ssDate[0];
-										if(mi === mmDate.length - 1) {
-											mmIdx = 0;
-										}
-										break goMin;
+							// 判断日期的合法性
+							if(this.checkDate(YY + '-' + MM + '-' + DD + ' 00:00:00') !== true && this.dayRule !== 'workDay') {
+								resetSecond();
+								resetMin();
+								resetHour();
+								resetDay();
+								continue goMouth;
+							}
+							
+							// 如果日期规则中有值时
+							if(this.dayRule === 'lastDay'){
+								//****获取每月最后一天
+								//获取下一天
+								let myDD = Number(DD)+1;
+								myDD = myDD < 10 ? '0' + myDD : myDD;
+								//校验它的下一天，true-说明下一天不是月末--跳出当前循环
+								if(this.checkDate(YY + '-' + MM + '-' + myDD + ' 00:00:00') === true){
+									continue goDay;
+								}
+							}else if(this.dayRule === 'workDay'){
+								DD = Number(DD);
+								let thisDD = DD < 10?'0'+DD:DD;
+								//校验并调整如果是2月30号这种日期传进来时需调整至正常月底
+								if(this.checkDate(YY + '-' + MM + '-' + thisDD + ' 00:00:00') !== true){
+									while(this.checkDate(YY + '-' + MM + '-' + thisDD + ' 00:00:00') !== true){
+										DD --;
+										thisDD = DD < 10?'0'+DD:DD;
 									}
+								}
+								// 获取达到条件的日期是星期X
+								let thisWeek = this.formatDate(new Date(YY + '-' + MM + '-' + DD + ' 00:00:00'),'week');
+								// 当星期日时
+								if(thisWeek === 0){
+									//先找下一个日，并判断是否为月底
+									DD ++;
+									thisDD = DD < 10?'0'+DD:DD;
+									//判断下一日已经不是合法日期
+									if(this.checkDate(YY + '-' + MM + '-' + thisDD + ' 00:00:00') !== true){
+										DD -= 3;
+									}
+								}else if(thisWeek === 6){
+									//当星期6时只需判断不是1号就可进行操作
+									if(this.dayRuleSup !== 1){
+										DD --;
+									}else{
+										DD += 2;
+									}
+								}
+								DD = DD < 10 ? '0' + DD : DD;
+							}
+							
+							
+							
+							goHour: for(let hi = hhIdx; hi < hhDate.length; hi++) {
+								// 判断当前“时”是否超出范围，超出时将时分秒重置并跳出当前日循环
+								if(nowHour > hhDate[hhDate.length - 1]) {
+									resetSecond();
+									resetMin();
+									resetHour();
+									continue goDay;
+								}
+								let hh = hhDate[hi] < 10 ? '0' + hhDate[hi] : hhDate[hi]
+								//  循环分
+								goMin: for(let mi = mmIdx; mi < mmDate.length; mi++) {
+									// 判断当前“分”是否超出范围，超出时将
+									if(nowMin > mmDate[mmDate.length - 1]) {
+										resetSecond();
+										resetMin();
+										continue goHour;
+									}
+									let mm = mmDate[mi] < 10 ? '0' + mmDate[mi] : mmDate[mi];
 									//循环获取秒数（从索引开始）
 									goSecond: for(let si = ssIdx; si <= ssDate.length - 1; si++) {
-										let ss = ssDate[si];
-										let time = YY + '-' + (MM < 10 ? '0' + MM : MM) + '-' + (DD < 10 ? '0' + DD : DD) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm) + ':' + (ss < 10 ? '0' + ss : ss);
-										// 当这个时间合法时才会添加进去
-										if(this.checkDate(time)) {
-											resultArr.push(time)
-											nums++;
-										} else {
-											ssIdx = 0;
+										if(nowSecond > ssDate[ssDate.length - 1]) {
+											resetSecond();
 											continue goMin;
 										}
+										let ss = ssDate[si] < 10 ? '0' + ssDate[si] : ssDate[si];
+										// 添加当前时间（时间合法性在日期循环时已经判断）
+										resultArr.push(YY + '-' + MM + '-' + DD + ' ' + hh + ':' + mm + ':' + ss)
+										nums++;
 										//如果条数满了就退出循环
 										if(nums === 5) break goYear;
 										//如果到达最大值时
 										if(si === ssDate.length - 1 && mi !== mmDate.length - 1) {
-											ssIdx = 0;
+											resetSecond();
 											continue goMin;
-										}else if( si === ssDate.length - 1 && mi === mmDate.length - 1 ){
-											ssIdx = 0;
-											mmIdx = 0;
+										} else if(si === ssDate.length - 1 && mi === mmDate.length - 1 && hi !== hhDate.length - 1) {
+											resetSecond();
+											resetMin();
 											continue goHour;
+										} else if(si === ssDate.length - 1 && mi === mmDate.length - 1 && hi === hhDate.length - 1 && Di !== DDDate.length - 1) {
+											resetSecond();
+											resetMin();
+											resetHour();
+											continue goDay;
+										} else if(si === ssDate.length - 1 && mi === mmDate.length - 1 && hi === hhDate.length - 1 && Di === DDDate.length - 1 && Mi !== MMDate.length-1) {
+											resetSecond();
+											resetMin();
+											resetHour();
+											resetDay();
+											continue goMouth;
+										} else if(si === ssDate.length - 1 && mi === mmDate.length - 1 && hi === hhDate.length - 1 && Di === DDDate.length - 1 && Mi === MMDate.length-1 && Yi !== YYDate.length-1) {
+											resetSecond();
+											resetMin();
+											resetHour();
+											resetDay();
+											resetMouth();
+											continue goYear;
 										}
 									} //goSecond
 								} //goMin
-							}
-						}
+							}//goHour
+						}//goDay
+					}//goMouth
+				}
+				//判断100年内的结果
+				if(resultArr.length === 0){
+					this.resultList = ['没有达到条件的结果！'];
+				}else{
+					this.resultList = resultArr;
+					if(resultArr.length !== 5){
+						this.resultList.push('最近100年内只有上面'+resultArr.length+'条结果！')
 					}
 				}
-				this.resultList = resultArr;
 				this.isShow = true;
-				console.log(this.resultList)
-
-				// *********************判断获取下一个时间开始
-
-				//if(ruleArr[6] !== undefined && ruleArr[6] !== '*'){
-				//if(ruleArr[6].match(/[0-9]{1,4}/g)[0] !== timeArr[0]){
-				//timeArr = [ruleArr[6].match(/[0-9]{1,4}/g)[0],'01','01','00','00','00']
-				//}
-				//}
-				// *********************判断获取下一个时间结束
 			},
 
 			getIndex(arr, value) {
@@ -130,27 +263,16 @@ export default {
 					}
 				}
 			},
-
 			getYearArr(rule, year) {
-				this.dateArr[6] = this.getOrderArr(year, year + 100);
+				this.dateArr[5] = this.getOrderArr(year, year + 100);
 				if(rule !== undefined) {
 					if(rule.indexOf('-') >= 0) {
-						this.dateArr[6] = this.getCycleArr(rule, year + 100, false)
+						this.dateArr[5] = this.getCycleArr(rule, year + 100, false)
 					} else if(rule.indexOf('/') >= 0) {
-						this.dateArr[6] = this.getAverageArr(rule, year + 100)
+						this.dateArr[5] = this.getAverageArr(rule, year + 100)
 					} else if(rule !== '*') {
-						this.dateArr[6] = this.getAssignArr(rule)
+						this.dateArr[5] = this.getAssignArr(rule)
 					}
-				}
-			},
-			getWeekArr(rule) {
-				this.dateArr[5] = this.getOrderArr(1, 7);
-				if(rule.indexOf('-') >= 0) {
-					this.dateArr[5] = this.getCycleArr(rule, 7, false)
-				} else if(rule.indexOf('#') >= 0 || rule.indexOf('L') >= 0) {
-					this.dateArr[5] = rule;
-				} else if(rule !== '*' && rule !== '?') {
-					this.dateArr[5] = this.getAssignArr(rule)
 				}
 			},
 			getMouthArr(rule) {
@@ -163,16 +285,47 @@ export default {
 					this.dateArr[4] = this.getAssignArr(rule)
 				}
 			},
+			getWeekArr(rule) {
+				//只有当日期规则的两个值均为“”时则表达日期是有选项的
+				if(this.dayRule === '' && this.dayRuleSup === ''){
+					if(rule.indexOf('-') >= 0) {
+						this.dayRule  = 'weekDay';
+						this.dayRuleSup = this.getCycleArr(rule, 7, false)
+					} else if(rule.indexOf('#') >= 0) {
+						this.dayRule  = 'assWeek';
+						let matchRule = rule.match(/[0-9]{1}/g);
+						this.dayRuleSup = [Number(matchRule[0]),Number(matchRule[1]),];
+					} else if(rule.indexOf('L') >= 0) {
+						this.dayRule  = 'lastWeek';
+						this.dayRuleSup = Number(rule.match(/[0-9]{1,2}/g)[0]);
+					} else if(rule !== '*' && rule !== '?') {
+						this.dayRule  = 'weekDay';
+						this.dayRuleSup = this.getAssignArr(rule)
+					}
+				}
+			},
 			getDayArr(rule) {
 				this.dateArr[3] = this.getOrderArr(1, 31);
+				this.dayRule = '';
+				this.dayRuleSup = '';
 				if(rule.indexOf('-') >= 0) {
 					this.dateArr[3] = this.getCycleArr(rule, 31, false)
+					this.dayRuleSup = 'null';
 				} else if(rule.indexOf('/') >= 0) {
 					this.dateArr[3] = this.getAverageArr(rule, 31)
-				} else if(rule.indexOf('W') >= 0 || rule.indexOf('L') >= 0) {
-					this.dateArr[3] = rule;
+					this.dayRuleSup = 'null';
+				} else if(rule.indexOf('W') >= 0) {
+					this.dayRule  = 'workDay';
+					this.dayRuleSup = Number(rule.match(/[0-9]{1,2}/g)[0]);
+					this.dateArr[3] = [this.dayRuleSup];
+				} else if( rule.indexOf('L') >= 0 ) {
+					this.dayRule = 'lastDay';
+					this.dayRuleSup = 'null';
 				} else if(rule !== '*' && rule !== '?') {
 					this.dateArr[3] = this.getAssignArr(rule)
+					this.dayRuleSup = 'null';
+				} else if(rule === '*'){
+					this.dayRuleSup = 'null';
 				}
 			},
 			getHourArr(rule) {
@@ -293,21 +446,15 @@ export default {
 			checkDate(value) {
 				let time = new Date(value);
 				let format = this.formatDate(time)
-					//console.log(value,format)
 				return value === format ? true : false;
 			}
 		},
 		watch: {
 			'ex': 'expressionChange'
 		},
-		computed: {
-
-		},
 		props: ['ex'],
 		mounted: function() {
 			// 初始化 获取一次结果
 			this.expressionChange();
-
-			//console.log(this.checkDate( '2017-9-40 04:5:6' ))
 		}
 }
