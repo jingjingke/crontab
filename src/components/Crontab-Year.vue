@@ -15,7 +15,7 @@
 		<div class="popup-input-warp">
 			<input type="radio" v-model='radioValue' value="5" />指定
 			<div class="popup-check-warp">
-				<label v-for='item in 2'><input type="checkbox" :value="item - 1 + fullYear" v-model='checkboxList'>{{item -1 + fullYear}}</label>
+				<label v-for='item in 9'><input type="checkbox" :value="item - 1 + fullYear" v-model='checkboxList'>{{item -1 + fullYear}}</label>
 			</div>
 		</div>
 	</li>
