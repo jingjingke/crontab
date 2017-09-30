@@ -58,8 +58,8 @@ export default {
 	computed: {
 		// 计算两个周期值
 		cycleTotal:function(){
-			this.cycle01 = this.checkNum(this.cycle01,0,58)
-			this.cycle02 = this.checkNum(this.cycle02,1,59)
+			this.cycle01 = this.checkNum(this.cycle01,0,59)
+			this.cycle02 = this.checkNum(this.cycle02,0,59)
 			return this.cycle01+'-'+this.cycle02;
 		},
 		// 计算平均用到的值

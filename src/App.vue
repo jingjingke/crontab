@@ -3,6 +3,7 @@
   	<div class="form-warp">
   		<input readonly="readonly" v-model='crontabValue' />
   		<button type="button" @click='changeShow'>选择时间规则</button>
+  		<button type="button" @click='crontabValue = ""'>清空</button>
   	</div>
     <Crontab v-show='showCrontab' @hide='changeShow' @fill='crontabFill'></Crontab>
   </div>
@@ -15,7 +16,7 @@ export default {
 	data(){
 		return {
 			crontabValue:'',
-			showCrontab:true
+			showCrontab:false
 		}
 	},
   name: 'app',
@@ -51,5 +52,11 @@ export default {
 	.form-warp {
 		text-align: center;
 		padding-top: 200px;
+	}
+	.form-warp input {
+		padding: 1px 5px;
+	}
+	.form-warp button {
+		padding: 0 10px;
 	}
 </style>
