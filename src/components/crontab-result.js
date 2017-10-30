@@ -21,7 +21,7 @@ export default {
 			// 用于暂时存符号时间规则结果的数组
 			let resultArr = [];
 			// 获取当前时间精确至[年、月、日、时、分、秒]
-			let nTime = new Date();
+			let nTime = new Date('2017-12-31 23:59:59');
 			let nYear = nTime.getFullYear();
 			let nMouth = nTime.getMonth() + 1;
 			let nDay = nTime.getDate();
@@ -48,80 +48,96 @@ export default {
 			let mIdx = this.getIndex(mDate, nMin);
 			let hIdx = this.getIndex(hDate, nHour);
 			let DIdx = this.getIndex(DDate, nDay);
-			let MMIdx = this.getIndex(MDate, nMouth);
+			let MIdx = this.getIndex(MDate, nMouth);
 			let YIdx = this.getIndex(YDate, nYear);
 			// 重置月日时分秒的函数(后面用的比较多)
-			const resetMouth = function(){
-				MMIdx = 0;
-				nMouth = MDate[MMIdx]
-			}
-			const resetDay = function(){
-				DIdx = 0;
-				nDay = DDate[DIdx]
-			}
-			const resetHour = function(){
-				hIdx = 0;
-				nHour = hDate[hIdx]
-			}
-			const resetMin = function(){
-				mIdx = 0;
-				nMin = mDate[mIdx]
-			}
 			const resetSecond = function() {
 				sIdx = 0;
 				nSecond = sDate[sIdx]
 			}
-			// 先行判断如果当前年份小于指定的年份则将月日时分秒重置到最小值
-			if(nYear < YDate[0]){
+			const resetMin = function(){
+				mIdx = 0;
+				nMin = mDate[mIdx]
 				resetSecond();
+			}
+			const resetHour = function(){
+				hIdx = 0;
+				nHour = hDate[hIdx]
 				resetMin();
+			}
+			const resetDay = function(){
+				DIdx = 0;
+				nDay = DDate[DIdx]
 				resetHour();
+			}
+			const resetMouth = function(){
+				MIdx = 0;
+				nMouth = MDate[MIdx]
 				resetDay();
+			}
+			// 如果当前年份不为数组中当前值
+			if(nYear !== YDate[YIdx]){
 				resetMouth();
 			}
+			// 如果当前月份不为数组中当前值
+			if(nMouth !== MDate[MIdx]){
+				resetDay();
+			}
+			// 如果当前“日”不为数组中当前值
+			if(nDay !== DDate[DIdx]){
+				resetHour();
+			}
+			// 如果当前“时”不为数组中当前值
+			if(nHour !== hDate[hIdx]){
+				resetMin();
+			}
+			// 如果当前“分”不为数组中当前值
+			if(nMin !== mDate[mIdx]){
+				resetSecond();
+			}
+			
 			// 循环年份数组
 			goYear: for(let Yi = YIdx; Yi < YDate.length; Yi++) {
 				let YY = YDate[Yi];
-				//如果当前月份小于最小的月份则将几个数置0
-				if(nMouth < MDate[0]){
-					resetSecond();
-					resetMin();
-					resetHour();
-					resetDay();
+				// 如果到达最大值时
+				if(nMouth > MDate[MDate.length-1]){
 					resetMouth();
+					continue;
 				}
 				// 循环月份数组
-				goMouth: for(let Mi = MMIdx; Mi < MDate.length; Mi++) {
-					//判断当前“月”是否超出范围，超出时将月日时分秒重置并跳出当月循环
-					if(nMouth > MDate[MDate.length-1]){
-						resetSecond();
-						resetMin();
-						resetHour();
-						resetDay();
-						resetMouth();
-						continue goYear;
-					}
+				goMouth: for(let Mi = MIdx; Mi < MDate.length; Mi++) {
 					// 赋值、方便后面运算
 					let MM = MDate[Mi];
 					MM = MM < 10 ? '0' + MM : MM;
+					// 如果到达最大值时
+					if(nDay > DDate[DDate.length -1]){
+						resetDay();
+						if(Mi === MDate.length-1){
+							resetMouth();
+							continue goYear;
+						}
+						continue;
+					}
 					// 循环日期数组
 					goDay: for(let Di = DIdx; Di < DDate.length; Di++) {
-						//判断当前“日”是否超出范围，超出时将日时分秒重置并跳出当前循环
-						if(nDay > DDate[DDate.length -1]){
-							resetSecond();
-							resetMin();
-							resetHour();
-							resetDay();
-							continue goMouth;
-						}
 						// 赋值、方便后面运算
 						let DD = DDate[Di];
 						let thisDD = DD < 10?'0'+DD:DD;
+						// 如果到达最大值时
+						if(nHour > hDate[hDate.length - 1]) {
+							resetHour();
+							if(Di === DDate.length - 1){
+								resetDay();
+								if(Mi === MDate.length-1){
+									resetMouth();
+									continue goYear;
+								}
+								continue goMouth;
+							}
+							continue;
+						}
 						// 判断日期的合法性，不合法的话也是跳出当前循环
 						if(this.checkDate(YY + '-' + MM + '-' + thisDD + ' 00:00:00') !== true && this.dayRule !== 'workDay' && this.dayRule !== 'lastWeek' && this.dayRule !== 'lastDay') {
-							resetSecond();
-							resetMin();
-							resetHour();
 							resetDay();
 							continue goMouth;
 						}
@@ -200,29 +216,50 @@ export default {
 						DD = DD < 10 ? '0' + DD : DD;
 						// 循环“时”数组
 						goHour: for(let hi = hIdx; hi < hDate.length; hi++) {
-							// 判断当前“时”是否超出范围，超出时将时分秒重置并跳出当前日循环
-							if(nHour > hDate[hDate.length - 1]) {
-								resetSecond();
-								resetMin();
-								resetHour();
-								continue goDay;
-							}
 							let hh = hDate[hi] < 10 ? '0' + hDate[hi] : hDate[hi]
+							// 如果到达最大值时
+							if(nMin > mDate[mDate.length - 1]) {
+								resetMin();
+								if(hi === hDate.length - 1){
+									resetHour();
+									if(Di === DDate.length - 1){
+										resetDay();
+										if(Mi === MDate.length-1){
+											resetMouth();
+											continue goYear;
+										}
+										continue goMouth;
+									}
+									continue goDay;
+								}
+								continue;
+							}
 							// 循环"分"数组
 							goMin: for(let mi = mIdx; mi < mDate.length; mi++) {
-								// 判断当前“分”是否超出范围，超出时将
-								if(nMin > mDate[mDate.length - 1]) {
-									resetSecond();
-									resetMin();
-									continue goHour;
-								}
 								let mm = mDate[mi] < 10 ? '0' + mDate[mi] : mDate[mi];
+								// 如果到达最大值时
+								if(nSecond > sDate[sDate.length - 1]) {
+									resetSecond();
+									if(mi === mDate.length-1){
+										resetMin();
+										if(hi === hDate.length - 1){
+											resetHour();
+											if(Di === DDate.length - 1){
+												resetDay();
+												if(Mi === MDate.length-1){
+													resetMouth();
+													continue goYear;
+												}
+												continue goMouth;
+											}
+											continue goDay;
+										}
+										continue goHour;
+									}
+									continue;
+								}
 								// 循环"秒"数组
 								goSecond: for(let si = sIdx; si <= sDate.length - 1; si++) {
-									if(nSecond > sDate[sDate.length - 1]) {
-										resetSecond();
-										continue goMin;
-									}
 									let ss = sDate[si] < 10 ? '0' + sDate[si] : sDate[si];
 									// 添加当前时间（时间合法性在日期循环时已经判断）
 									resultArr.push(YY + '-' + MM + '-' + DD + ' ' + hh + ':' + mm + ':' + ss)
@@ -230,31 +267,25 @@ export default {
 									//如果条数满了就退出循环
 									if(nums === 5) break goYear;
 									//如果到达最大值时
-									if(si === sDate.length - 1 && mi !== mDate.length - 1) {
+									if(si === sDate.length - 1){
 										resetSecond();
+										if(mi === mDate.length - 1){
+											resetMin();
+											if(hi === hDate.length - 1){
+												resetHour();
+												if(Di === DDate.length - 1){
+													resetDay();
+													if(Mi === MDate.length-1){
+														resetMouth();
+														continue goYear;
+													}
+													continue goMouth;
+												}
+												continue goDay;
+											}
+											continue goHour;
+										}
 										continue goMin;
-									} else if(si === sDate.length - 1 && mi === mDate.length - 1 && hi !== hDate.length - 1) {
-										resetSecond();
-										resetMin();
-										continue goHour;
-									} else if(si === sDate.length - 1 && mi === mDate.length - 1 && hi === hDate.length - 1 && Di !== DDate.length - 1) {
-										resetSecond();
-										resetMin();
-										resetHour();
-										continue goDay;
-									} else if(si === sDate.length - 1 && mi === mDate.length - 1 && hi === hDate.length - 1 && Di === DDate.length - 1 && Mi !== MDate.length-1) {
-										resetSecond();
-										resetMin();
-										resetHour();
-										resetDay();
-										continue goMouth;
-									} else if(si === sDate.length - 1 && mi === mDate.length - 1 && hi === hDate.length - 1 && Di === DDate.length - 1 && Mi === MDate.length-1 && Yi !== YDate.length-1) {
-										resetSecond();
-										resetMin();
-										resetHour();
-										resetDay();
-										resetMouth();
-										continue goYear;
 									}
 								} //goSecond
 							} //goMin
