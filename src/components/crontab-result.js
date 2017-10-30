@@ -21,7 +21,7 @@ export default {
 			// 用于暂时存符号时间规则结果的数组
 			let resultArr = [];
 			// 获取当前时间精确至[年、月、日、时、分、秒]
-			let nTime = new Date('2017-12-31 23:59:59');
+			let nTime = new Date();
 			let nYear = nTime.getFullYear();
 			let nMouth = nTime.getMonth() + 1;
 			let nDay = nTime.getDate();
