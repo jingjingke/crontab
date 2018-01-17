@@ -1,3 +1,6 @@
+# 组件方式
+请使用dist目录下的文件
+
 # crontab
 
 界面是用VUE去建设的，但是在运算逻辑还是以Javascript为主。尤其解析crontab相应时间结果，稍显复杂。
