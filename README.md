@@ -12,7 +12,7 @@
 ```pre
 
 ├── App.vue                      // 开始界面
-├── main.js                      // 入口文件
+├── index.js                      // 入口文件
 ├── assets                       // 静态资源:样式/图片等
 ├── components                   // crontab组件们
 │   ├── Crontab.vue              // crontab组件主界面
