@@ -19,7 +19,7 @@
 				<table>
 					<thead>
 						<th v-for='item of tabTitles' width='40'>{{item}}</th>
-						<th>Cron完成表达式</th>
+						<th>crontab完整表达式</th>
 					</thead>
 					<tbody>
 						<td><span>{{contabValueObj.second}}</span></td>
