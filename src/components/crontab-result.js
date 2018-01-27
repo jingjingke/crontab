@@ -95,7 +95,7 @@ export default {
 			if(nMin !== mDate[mIdx]){
 				resetSecond();
 			}
-			
+
 			// 循环年份数组
 			goYear: for(let Yi = YIdx; Yi < YDate.length; Yi++) {
 				let YY = YDate[Yi];
@@ -183,7 +183,16 @@ export default {
 							let thisWeek = this.formatDate(new Date(YY + '-' + MM + '-' + DD + ' 00:00:00'),'week');
 							//校验当前星期是否在星期池（dayRuleSup）中
 							if(Array.indexOf(this.dayRuleSup,thisWeek) < 0){
-								continue goDay;
+							  // 如果到达最大值时
+                if(Di === DDate.length - 1){
+                  resetDay();
+                  if(Mi === MDate.length-1){
+                    resetMouth();
+                    continue goYear;
+                  }
+                  continue goMouth;
+                }
+                continue;
 							}
 						}else if(this.dayRule === 'assWeek'){
 						//如果指定了是第几周的星期几
