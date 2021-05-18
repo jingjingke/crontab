@@ -1,52 +1,53 @@
-# crontab
+# vue-crontab-ui
 
-界面是用VUE去建设的，但是在运算逻辑还是以Javascript为主。尤其解析crontab相应时间结果，稍显复杂。
-
-线上访问地址：[https://jingjingke.github.io/crontab/dist/](https://jingjingke.github.io/crontab/dist/)
+该分支目前是为了发布npm包所创建，包名：vue-crontab-ui 。
 
 
-## 目录结构 ##
+## 使用 ##
 
-其它都是套路，主要说一下src目录中的文件主要是做什么的。
+（1）安装
+```bash
+npm install vue-crontab-ui 
+```
+（2）vue 项目中的 main.js 中引入并使用
 
-```pre
+```js
+import crontab from "vue-crontab-ui";
 
-├── App.vue                      // 开始界面
-├── main.js                      // 入口文件
-├── assets                       // 静态资源:样式/图片等
-├── components                   // crontab组件们
-│   ├── Crontab.vue              // crontab组件主界面
-│   ├── crontab.js               // crontab组件主界面使用的js代码
-│   ├── Crontab-Year.vue         // “年”组件
-│   ├── crontab-year.js          // “年”组件使用的js代码
-│   ├── Crontab-Mouth.vue        // “月”组件
-│   ├── crontab-mouth.js         // “月”组件使用的js代码
-│   ├── Crontab-Day.vue          // “日”组件
-│   ├── crontab-day.js           // “日”组件使用的js代码
-│   ├── Crontab-Hour.vue         // “时”组件
-│   ├── crontab-hour.js          // “时”组件使用的js代码
-│   ├── Crontab-Min.vue          // “分”组件
-│   ├── crontab-min.js           // “分”组件使用的js代码
-│   ├── Crontab-Second.vue       // “秒”组件
-│   ├── crontab-second.js        // “秒”组件使用的js代码
-│   ├── Crontab-Result.vue       // “结果”组件（解析最近5次运行时间）
-│   └── crontab-result.js        // “结果”组件使用的js代码
-
+Vue.use(crontab);
+```
+(3) vue 项目页面中使用该组件（组件名字即：crontab）
+```vue
+<template>
+  <div id="app">
+    <crontab v-model="crontabEx" :render="isLazy" />
+  </div>
+</template>
+<script>
+export default {
+  name: "App",
+  data() {
+    return {
+      crontabEx: "",  // 获取到的表达式值
+      isLazy: false,  // 是否在需要时才渲染节点
+    };
+  },
+  watch: {
+    crontabEx: (value) => {
+      // 监听到表达式中值的变化
+      console.log(value);
+    },
+  },
+};
+</script>
 
 ```
+(4) 组件参数 render
 
-## 解析逻辑  ##
-
-逻辑、表达式如果有我理解不正确的地方，欢迎提意见。虽然是依托VUE去做的项目，但是解析的代码用原生JS也是可以实现的。
-
-具体可以参考：src/components/Crontab-result.js中的expressionChange()方法，这是解析的主要方法。它首先会将表达式用空格分隔成几块，再对每一个小规则进行操作。
-
-其中用的比较多的就是各种数组，例如我会将符合规则的秒数放在一个数组中;另一个就是利用continue label跳出指定循环（例如向上跳两层for循环）。
-
-文件中也有相应的注释，读起来应该不会太费力~~
-
-
+除了 v-model可以绑定表达式的值外， render 用于判断是否在需要时才渲染节点。
+例如该组件放置在弹窗中，可以将该值与组件是否显示与隐藏使用同一变量，当它为false时，是不会渲染内部组件，只有当它第一次为真的，会渲染。
 
 ## 效果截图 ##
+npm 包中去掉了弹窗效果，实际使用时可以通过自已的 UI 弹窗框架来作为容器。
 
 ![效果截图](https://jingjingke.github.io/crontab/src/assets/effect.png)

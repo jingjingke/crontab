@@ -1,11 +1,11 @@
 <template>
-  <div class="popup-warp">
-    <div class="popup-main">
-    	<ul class="popup-title">
+  <div class="crontab-popup-wrap" v-if="inited">
+    <div class="crontab-popup-main">
+    	<ul class="crontab-popup-title">
     		<li>规则类型</li>
     		<li v-for='(item,index) of tabTitles' :class='{on:index===tabActive}' @click='tabCheck(index)' >{{item}}</li>
     	</ul>
-    	<ul class="popup-body">
+    	<ul class="crontab-popup-body">
     		<CrontabSecond :class='{ on:tabActive===0 }' @updata='updataContabValue' :check='checkNumber'></CrontabSecond>
     		<CrontabMin :class='{ on:tabActive===1 }' @updata='updataContabValue' :check='checkNumber'></CrontabMin>
     		<CrontabHour :class='{ on:tabActive===2 }' @updata='updataContabValue' :check='checkNumber'></CrontabHour>
@@ -14,7 +14,7 @@
     		<CrontabWeek :class='{ on:tabActive===5 }' @updata='updataContabValue' :check='checkNumber' :day='contabValueObj.day'></CrontabWeek>
     		<CrontabYear :class='{ on:tabActive===6 }' @updata='updataContabValue' :check='checkNumber'></CrontabYear>
     	</ul>
-    	<div class="popup-result">
+    	<div class="crontab-popup-result">
 				<p class="title">时间表达式</p>
 				<table>
 					<thead>
@@ -34,10 +34,6 @@
 				</table>
 			</div>
     	<CrontabResult :ex='contabValueString'></CrontabResult>
-    	<div class="popup-btns">
-    		<button type="button" @click='submitFill'>确定</button>
-    		<button type="button" @click='hidePopup'>取消</button>
-    	</div>
     </div>
   </div>
 </template>

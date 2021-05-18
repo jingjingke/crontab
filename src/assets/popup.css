@@ -1,29 +1,19 @@
-.popup-warp {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0,0,0,0.3);
+* {
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
-.popup-main {
+.crontab-popup-main {
 	position: relative;
-	width: 600px;
-	height: 700px;
-	top: 50%;
-	margin: -350px auto 0;
-	background: #fff;
-	border-radius:5px;
 	font-size: 12px;
-	overflow: hidden;
 }
-.popup-title {
+.crontab-popup-title {
 	overflow: hidden;
 	line-height: 34px;
 	padding-top:6px;
 	background: #f2f2f2;
 }
-.popup-title li {
+.crontab-popup-title li {
 	float: left;
 	width: 60px;
 	margin: 0 3px;
@@ -32,68 +22,67 @@
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 }
-.popup-title li:first-child {
+.crontab-popup-title li:first-child {
 	width: 90px;
 }
-.popup-title li:not(:first-child):hover {
+.crontab-popup-title li:not(:first-child):hover {
 	background: #e8e8e8;
 	cursor: pointer;
 }
-.popup-title .on, .popup-title li.on:hover {
+.crontab-popup-title .on, .crontab-popup-title li.on:hover {
 	background: #fff;
 }
-.popup-body {
-	padding: 10px 20px 0;
+.crontab-popup-body {
+	padding: 10px 20px 10px;
 	line-height: 24px;
-	height: 280px;
+  text-align: left;
 }
-.popup-body li {
+.crontab-popup-body li {
 	display: none;
 }
-.popup-body .on {
+.crontab-popup-body .on {
 	display: block;
 }
-.popup-body input[type='radio'] {
+.crontab-popup-body input[type='radio'] {
 	position: relative;
 	top:2px;
 	margin-right: 6px;
 }
-.popup-body input[type='number']{
+.crontab-popup-body input[type='number']{
 	margin: 0 3px;
 	padding: 0 5px;
 	width: 60px;
 	color: #555;
 }
-.popup-body input[type='checkbox']{
+.crontab-popup-body input[type='checkbox']{
 	position: relative;
 	top: 2px;
 	margin: 0 4px;
 }
-.popup-input-warp {
+.crontab-input-warp {
 	margin-top: 6px;
 }
-.popup-check-warp {
-	width: 520px;
+.crontab-check-warp {
 	padding-left:13px;
 	overflow: hidden;
 }
-.popup-check-warp label {
+.crontab-check-warp label {
 	float: left;
 	width: 52px;
 }
-.popup-check-short label {
+.crontab-check-short label {
 	width: 40px;
 }
-.popup-result {
+.crontab-popup-result {
 	line-height: 24px;
 	margin:25px 20px 0;
 	padding:15px 10px 10px;
 	border: 1px solid #ccc;
 	position: relative;
 }
-.popup-result .title{
+.crontab-popup-result .title{
 	position: absolute;
-	top: -28px;
+	top: -15px;
 	left: 50%;
 	width: 140px;
 	font-size: 14px;
@@ -102,12 +91,12 @@
 	line-height: 30px;
 	background: #fff;
 }
-.popup-result table {
+.crontab-popup-result table {
 	text-align: center;
 	width: 100%;
 	margin: 0 auto;
 }
-.popup-result table span {
+.crontab-popup-result table span {
 	display:block;
 	width: 100%;
 	font-family: arial;
@@ -117,17 +106,9 @@
 	overflow: hidden;
 	border: 1px solid #e8e8e8;
 }
-.popup-result-scroll {
+.crontab-popup-result-scroll {
 	font-size: 12px;
 	line-height: 24px;
 	height:10em;
-	overflow-y: scroll;
-}
-.popup-btns {
-	padding-top: 20px;
-	text-align: center;
-}
-.popup-btns button {
-	height: 30px;
-	width: 150px;
+	overflow-y: auto;
 }
