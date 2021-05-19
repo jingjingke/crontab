@@ -1,7 +1,7 @@
 export default {
 	data() {
 		return {
-			radioValue:1,
+			radioValue:'1',
 			workday:1,
 			cycle01:1,
 			cycle02:2,
@@ -12,7 +12,7 @@ export default {
 		}
 	},
 	name: 'crontab-day',
-	props:['check','week'],
+	props:['check','week','init'],
 	methods: {
 		// 单选按钮值变化时
 		radioChange(){
@@ -105,5 +105,40 @@ export default {
 			let str = this.checkboxList.join();
 			return str===''?'*':str;
 		}
-	}
+	},
+  mounted: function() {
+    // 初始化值
+    if(this.init === '?'){
+      this.radioValue = '2';
+      return;
+    }
+    let cycleArr = this.init.split('-');
+    if(cycleArr.length === 2){
+      this.radioValue = '3';
+      this.cycle01 = cycleArr[0];
+      this.cycle02 = cycleArr[1];
+      return;
+    }
+    let averageArr = this.init.split('/');
+    if(averageArr.length === 2){
+      this.radioValue = '4';
+      this.average01 = averageArr[0];
+      this.average02 = averageArr[1];
+      return;
+    }
+    if(/W/.test(this.init)){
+      this.radioValue = '5';
+      this.workday = Number(this.init.replace('W',''));
+      return;
+    }
+    if(this.init === 'L'){
+      this.radioValue = '6';
+      return;
+    }
+    if(this.init !== '*'){
+      this.radioValue = '7';
+      let list = this.init.split(',');
+      this.checkboxList = list;
+    }
+  }
 }

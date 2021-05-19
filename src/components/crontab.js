@@ -21,10 +21,25 @@ export default {
 				mouth:'*',
 				week:'?',
 				year:'',
-			}
+			},
+      inited:false
 		}
 	},
 	name: 'crontab',
+  props: {
+    render: {
+      type: Boolean || String,
+      default: function () {
+        return true;
+      }
+    },
+    value: {
+      type: String,
+      default: function () {
+        return ''
+      }
+    }
+  },
 	methods: {
 		// tab切换值
 		tabCheck(index){
@@ -62,6 +77,16 @@ export default {
 			return str;
 		}
 	},
+  watch:{
+    contabValueString:function (value) {
+      this.$emit('input',value);
+    },
+    render: function (value) {
+      if ((value === true || value === "true") && !this.inited) {
+        this.inited = true;
+      }
+    }
+  },
 	components:{
 		CrontabSecond,
 		CrontabMin,
@@ -73,5 +98,20 @@ export default {
 		CrontabResult
 	},
 	mounted: function() {
+    this.inited = (this.render === true || this.render === 'true');
+    if (this.value === '') {
+      this.$emit('input', this.contabValueString);
+    } else {
+      let array = this.value.split(' ');
+      if (array.length >= 6) {
+        this.contabValueObj.second = array[0];
+        this.contabValueObj.min = array[1];
+        this.contabValueObj.hour = array[2];
+        this.contabValueObj.day = array[3];
+        this.contabValueObj.mouth = array[4];
+        this.contabValueObj.week = array[5];
+        this.contabValueObj.year = array[6] || '';
+      }
+    }
 	}
 }

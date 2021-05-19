@@ -2,7 +2,7 @@ export default {
 	data() {
 		return {
 			fullYear:'',
-			radioValue:1,
+			radioValue:'1',
 			cycle01:0,
 			cycle02:0,
 			average01:0,
@@ -12,7 +12,7 @@ export default {
 		}
 	},
 	name: 'crontab-year',
-	props:['check'],
+	props:['check','init'],
 	methods: {
 		// 单选按钮值变化时
 		radioChange(){
@@ -81,5 +81,32 @@ export default {
 	mounted: function() {
 		// 仅获取当前年份
 		this.fullYear = new Date().getFullYear();
+    // 初始化值
+    if(this.init === '*'){
+      this.radioValue = '2';
+      return;
+    }
+    let cycleArr = this.init.split('-');
+    if(cycleArr.length === 2){
+      this.radioValue = '3';
+      this.cycle01 = cycleArr[0];
+      this.cycle02 = cycleArr[1];
+      return;
+    }
+    let averageArr = this.init.split('/');
+    if(averageArr.length === 2){
+      this.radioValue = '4';
+      this.average01 = averageArr[0];
+      this.average02 = averageArr[1];
+      return;
+    }
+    if(this.init !== ''){
+      this.radioValue = '5';
+      let list = this.init.split(',');
+      this.checkboxList.length = 0;
+      list.forEach(num=>{
+        this.checkboxList.push(Number(num));
+      })
+    }
 	}
 }
