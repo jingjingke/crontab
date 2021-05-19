@@ -1,7 +1,7 @@
 export default {
 	data() {
 		return {
-			radioValue:1,
+			radioValue:'1',
 			cycle01:1,
 			cycle02:2,
 			average01:0,
@@ -11,7 +11,7 @@ export default {
 		}
 	},
 	name: 'crontab-second',
-	props:['check'],
+	props:['check','init'],
 	methods: {
 		// 单选按钮值变化时
 		radioChange(){
@@ -73,5 +73,27 @@ export default {
 			let str = this.checkboxList.join();
 			return str===''?'*':str;
 		}
-	}
+	},
+  mounted: function() {
+    // 初始化值
+    let cycleArr = this.init.split('-');
+    if(cycleArr.length === 2){
+      this.radioValue = '2';
+      this.cycle01 = cycleArr[0];
+      this.cycle02 = cycleArr[1];
+      return;
+    }
+    let averageArr = this.init.split('/');
+    if(averageArr.length === 2){
+      this.radioValue = '3';
+      this.average01 = averageArr[0];
+      this.average02 = averageArr[1];
+      return;
+    }
+    if(this.init !== '*'){
+      this.radioValue = '4';
+      let list = this.init.split(',');
+      this.checkboxList = list;
+    }
+  }
 }
