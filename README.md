@@ -4,6 +4,10 @@
 
 线上访问地址：[https://jingjingke.github.io/crontab/dist/](https://jingjingke.github.io/crontab/dist/)
 
+## npm发布 ##
+该项目npm包名：vue-crontab-ui，具体内容指路npmjs分支。
+
+目前master分支的内容已经合并到npmjs中，若后期有bug需要维护，可以在master分支中拉出新的分支，再将代码合到master与npmjs中。这样能够保最大程度保持代码一致性。
 
 ## 目录结构 ##
 
